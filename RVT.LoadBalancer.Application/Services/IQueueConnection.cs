@@ -11,7 +11,7 @@ namespace RVT.LoadBalancer.Application.Services
         bool IsConnected {get;}
         bool TryConnect();
         IModel CreateModel();
-        void CreateConsumerChannel();
+        void InitReceiverChannel();
         void Disconnect();
     }
 }

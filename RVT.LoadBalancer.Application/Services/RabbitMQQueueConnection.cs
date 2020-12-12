@@ -16,13 +16,18 @@ namespace RVT.LoadBalancer.Application.Services
         private readonly IConnectionFactory _connectionFactory;
         private IConnection _connection;
         bool _disposed;
+        private QueueHandlerWorker _queueHandler;
 
 
         public RabbitMQQueueConnection(IConnectionFactory connectionFactory)
-        {
-            
+        {   
             _connectionFactory = connectionFactory;
+            if(!IsConnected)
+            {
+                TryConnect();
+            }
         }
+
 
         public bool IsConnected
         {
@@ -32,19 +37,25 @@ namespace RVT.LoadBalancer.Application.Services
             }
         }
 
-        public void CreateConsumerChannel()
+        public void InitReceiverChannel()
         {
             if(!IsConnected)
             {
                 TryConnect();
             }
 
-            // need to init queue handler 
+            _queueHandler = new QueueHandlerWorker(this, "voteDataMsg");
+            _queueHandler.InitReceiverChannel();
+            
         }
 
         public IModel CreateModel()
         {
-            throw new NotImplementedException();
+            if(!IsConnected)
+            {
+                throw new InvalidOperationException("RabbitMQ are not available to create Model");
+            }
+            return _connection.CreateModel();
         }
 
         public void Disconnect()
