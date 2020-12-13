@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
+using RVT.LoadBalancer.Application.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,18 +25,29 @@ namespace RVT.LoadBalancer.Application
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
+
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RVT.LoadBalancer.Application", Version = "v1" });
+            });
+
+            services.AddSingleton<RabbitMQQueueConnection>(opt =>
+            {
+                var factory = new ConnectionFactory()
+                {
+                    HostName = Configuration["QueueHost"],
+                    UserName = Configuration["RabbitMQUsername"],
+                    Password = Configuration["RabbitMQPassword"],
+                    Port= Convert.ToInt32(Configuration["RabbotMQPort"])
+                };
+                return new RabbitMQQueueConnection(factory);
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -54,6 +67,35 @@ namespace RVT.LoadBalancer.Application
             {
                 endpoints.MapControllers();
             });
+
+            app.UseRabbitListener();
         }
     }
+    public static class ApplicationBuilderExtensions
+    {
+        public static RabbitMQQueueConnection Listener { get; set; }
+
+        public static IApplicationBuilder UseRabbitListener(this IApplicationBuilder application)
+        {
+            Listener = application.ApplicationServices.GetRequiredService<RabbitMQQueueConnection>();
+
+            var liftime = application.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
+
+            liftime.ApplicationStarted.Register(OnStarted);
+            liftime.ApplicationStopping.Register(OnStopping);
+
+            return application;
+        }
+
+        private static void OnStopping()
+        {
+            Listener.Disconnect();
+        }
+
+        private static void OnStarted()
+        {
+            Listener.InitReceiverChannel();
+        }
+    }
+
 }
