@@ -1,8 +1,13 @@
-﻿using RabbitMQ.Client;
+﻿using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RVT.Common.Messages;
+using RVT.LoadBalancer.Core;
+using RVT.LoadBalancer.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace RVT.LoadBalancer.Application.Services
@@ -12,11 +17,13 @@ namespace RVT.LoadBalancer.Application.Services
         private string _queueName;
         private readonly IQueueConnection _queueConnection;
         private IModel _receiverChannel;
+        private readonly IAdministrator _adminBL;
 
         public QueueHandlerWorker(IQueueConnection connection,string queueName)
         {
             _queueConnection = connection;
             _queueName = queueName;
+            _adminBL = new BusinessManager().GetAdminActions();
         }
 
 
@@ -38,20 +45,27 @@ namespace RVT.LoadBalancer.Application.Services
 
             var receiver = new EventingBasicConsumer(channel);
 
-            receiver.Received += ReceivedEvent;
-
-            
+            receiver.Received += ReceivedEvent;           
         }
 
         public void ReceivedEvent(object sender, BasicDeliverEventArgs args)
         {
+            if (args.RoutingKey == "voteDataMsg")
+            {
+                var data = Encoding.UTF8.GetString(args.Body.ToArray());
+                ChooserLbMessage message = JsonConvert.DeserializeObject<ChooserLbMessage>(data);
 
+                _adminBL.VoteAction(message);
+            }
         }
 
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            if (_queueConnection != null)
+            {
+                _queueConnection.Disconnect();
+            }
         }
     }
 }
