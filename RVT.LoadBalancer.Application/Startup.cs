@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -29,6 +30,7 @@ namespace RVT.LoadBalancer.Application
         {
 
             services.AddControllers();
+            services.AddSingleton<CertificateValidationService>();
             services.AddSwaggerGen(c =>
             {
 
@@ -46,6 +48,29 @@ namespace RVT.LoadBalancer.Application
                 };
                 return new RabbitMQQueueConnection(factory);
             });
+
+            services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
+                .AddCertificate(options =>
+                {
+                    options.AllowedCertificateTypes = CertificateTypes.All;
+                    options.RevocationMode = System.Security.Cryptography.X509Certificates.X509RevocationMode.NoCheck;
+                    options.Events = new CertificateAuthenticationEvents
+                    {
+                        OnCertificateValidated = context =>
+                        {
+
+                            var validatorService = context.HttpContext.RequestServices.GetService<CertificateValidationService>();
+
+                            if (validatorService.ValidateCertificate(context.ClientCertificate.Thumbprint))
+                            {
+                                context.Success();
+                            }
+                            else context.Fail(new Exception("Uauthenticated user. Access diened"));
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
