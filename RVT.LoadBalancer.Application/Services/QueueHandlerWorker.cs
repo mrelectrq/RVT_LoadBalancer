@@ -27,7 +27,7 @@ namespace RVT.LoadBalancer.Application.Services
         }
 
 
-        public void InitReceiverChannel()
+        public IModel InitReceiverChannel()
         {
 
             if(!_queueConnection.IsConnected)
@@ -41,11 +41,16 @@ namespace RVT.LoadBalancer.Application.Services
                 durable: false,
                 autoDelete: false,
                 arguments: null);
-
-
             var receiver = new EventingBasicConsumer(channel);
 
-            receiver.Received += ReceivedEvent;           
+            receiver.Received += ReceivedEvent;
+
+            channel.CallbackException += (sender, args) =>
+            {
+                _receiverChannel.Dispose();
+                _receiverChannel = InitReceiverChannel();
+            };
+            return channel;
         }
 
         public void ReceivedEvent(object sender, BasicDeliverEventArgs args)
@@ -56,15 +61,17 @@ namespace RVT.LoadBalancer.Application.Services
                 ChooserLbMessage message = JsonConvert.DeserializeObject<ChooserLbMessage>(data);
 
                 _adminBL.VoteAction(message);
+
             }
         }
 
 
         public void Dispose()
         {
-            if (_queueConnection != null)
+            if (_receiverChannel != null)
             {
-                _queueConnection.Disconnect();
+                _receiverChannel.Dispose();
+                _receiverChannel = InitReceiverChannel();
             }
         }
     }
