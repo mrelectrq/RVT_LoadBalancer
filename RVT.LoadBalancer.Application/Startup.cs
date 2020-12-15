@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
+using RVT.Common.Models;
 using RVT.LoadBalancer.Application.Services;
 using System;
 using System.Collections.Generic;
@@ -25,11 +27,12 @@ namespace RVT.LoadBalancer.Application
         }
 
         public IConfiguration Configuration { get; }
-
+        
         public void ConfigureServices(IServiceCollection services)
         {
 
             services.AddControllers();
+            services.AddAutoMapper(typeof(Startup));
             services.AddSingleton<CertificateValidationService>();
             services.AddSwaggerGen(c =>
             {
@@ -65,7 +68,7 @@ namespace RVT.LoadBalancer.Application
                             {
                                 context.Success();
                             }
-                            else context.Fail(new Exception("Uauthenticated user. Access diened"));
+                            else context.Fail(new Exception("Unauthenticated user. Access diened"));
                             return Task.CompletedTask;
                         }
                     };
