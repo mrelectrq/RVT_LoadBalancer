@@ -28,7 +28,7 @@ namespace RVT.LoadBalancer.Application.Services.Tests
             };
             var message = new ChooserLbMessage()
             {
-                IDNP = "512412412312",
+                //IDNP = "512412412312",
                 IDVN = "1241231231",
                 PartyChoosed = 3,
                 Vote_date = DateTime.Now

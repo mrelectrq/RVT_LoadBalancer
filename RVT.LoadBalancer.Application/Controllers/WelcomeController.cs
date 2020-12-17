@@ -7,6 +7,7 @@ using RVT.LoadBalancer.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace RVT.LoadBalancer.Application.Controllers
@@ -32,6 +33,13 @@ namespace RVT.LoadBalancer.Application.Controllers
 
             participant.IpAddress = HttpContext.Connection.RemoteIpAddress.ToString();
             participant.RegisterDate = DateTime.Now;
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
+                AllowAutoRedirect = true,
+            };
+
+            participant.Sender = new HttpClient(handler);
             _node.RegisterNode(participant);           
         }
 
