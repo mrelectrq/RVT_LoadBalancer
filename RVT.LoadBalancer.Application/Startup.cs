@@ -47,7 +47,7 @@ namespace RVT.LoadBalancer.Application
                     HostName = Configuration["QueueHost"],
                     UserName = Configuration["RabbitMQUsername"],
                     Password = Configuration["RabbitMQPassword"],
-                    Port= Convert.ToInt32(Configuration["RabbotMQPort"])
+                    Port= 5672
                 };
                 return new RabbitMQQueueConnection(factory);
             });

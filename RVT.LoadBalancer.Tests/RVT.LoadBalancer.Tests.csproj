@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RVT.Common\RVT.Common.csproj" />
     <ProjectReference Include="..\RVT.LoadBalancer.Application\RVT.LoadBalancer.Application.csproj" />
+    <ProjectReference Include="..\RVT.LoadBalancer.Core\RVT.LoadBalancer.Core.csproj" />
   </ItemGroup>
 
 </Project>
