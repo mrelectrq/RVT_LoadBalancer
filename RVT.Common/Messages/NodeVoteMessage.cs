@@ -7,7 +7,7 @@ namespace RVT.Common.Messages
 {
     public class NodeVoteMessage
     {
-        public ChooserLbMessage messate { get; set; }
-        public List<Node> Neighbours { get; set; }
+        public ChooserLbMessage Message { get; set; }
+        public List<NodeNeighbor> Neighbors { get; set; }
     }
 }
