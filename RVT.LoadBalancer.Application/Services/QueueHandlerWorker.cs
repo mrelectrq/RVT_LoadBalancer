@@ -60,11 +60,37 @@ namespace RVT.LoadBalancer.Application.Services
                 var data = Encoding.UTF8.GetString(args.Body.ToArray());
                 ChooserLbMessage message = JsonConvert.DeserializeObject<ChooserLbMessage>(data);
 
-                _adminBL.VoteAction(message);
+                var response = _adminBL.VoteAction(message);
 
+                PublishResponse(response,"voteResponse",args.BasicProperties.Headers);
             }
         }
 
+        private void PublishResponse(string response,string _queueName, IDictionary<string,object> headers)
+        {
+            if(!_queueConnection.IsConnected)
+            {
+                _queueConnection.TryConnect();
+            }
+
+            using(var channel =_queueConnection.CreateModel())
+            {
+                channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                var body = Encoding.UTF8.GetBytes(response);
+
+                IBasicProperties properties = channel.CreateBasicProperties();
+                properties.Headers = headers;
+                properties.Persistent = true;
+                properties.DeliveryMode = 2;
+                channel.ConfirmSelect();
+                channel.BasicPublish(exchange: "", routingKey: _queueName, mandatory: true, basicProperties: properties, body: body);
+                channel.WaitForConfirmsOrDie();
+
+                //channel.BasicAcks Acknowledge implementation in case if Broker received message
+                channel.ConfirmSelect();
+            }
+
+        }
 
         public void Dispose()
         {

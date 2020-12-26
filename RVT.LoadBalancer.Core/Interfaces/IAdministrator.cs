@@ -8,7 +8,7 @@ namespace RVT.LoadBalancer.Core.Interfaces
 {
     public  interface IAdministrator
     {
-        void VoteAction(ChooserLbMessage message);
+        public string VoteAction(ChooserLbMessage message);
 
         public NodeRegResponse RegistrationAction(RegistrationMessage message);
     }
