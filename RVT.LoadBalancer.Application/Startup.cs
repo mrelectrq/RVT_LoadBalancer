@@ -32,7 +32,10 @@ namespace RVT.LoadBalancer.Application
         {
 
             services.AddControllers();
-            services.AddAutoMapper(typeof(Startup));
+            services.AddAutoMapper(opt =>
+            {
+                opt.CreateMap<Node, NodeData>();
+            });
             services.AddSingleton<CertificateValidationService>();
             services.AddSwaggerGen(c =>
             {
@@ -40,7 +43,7 @@ namespace RVT.LoadBalancer.Application
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RVT.LoadBalancer.Application", Version = "v1" });
             });
 
-            services.AddSingleton<RabbitMQQueueConnection>(opt =>
+            services.AddSingleton(opt =>
             {
                 var factory = new ConnectionFactory()
                 {
@@ -96,7 +99,7 @@ namespace RVT.LoadBalancer.Application
                 endpoints.MapControllers();
             });
 
-            app.UseRabbitListener();
+          //  app.UseRabbitListener();
         }
     }
     public static class ApplicationBuilderExtensions
