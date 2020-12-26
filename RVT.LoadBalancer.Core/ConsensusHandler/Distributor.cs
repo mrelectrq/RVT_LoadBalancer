@@ -31,11 +31,16 @@ namespace RVT.LoadBalancer.Core.ConsensusHandler
                 var neighbours = Mapping.Mapper.Map<List<NodeNeighbor>>(choosedNodes);
                 return neighbours;
             }
+        }
 
-
-
-            
-            // To think about how to send NodeList to Executor without HttpClient. public class Neighbour.... List<Neighbour> Neighbours
+        public static NodeData GetExecutor()
+        {
+            var _storage = NodeStorage.GetInstance();
+            var totalNodeList = _storage.GetNodes();
+            var random = new Random();
+            var choosedIndex = random.Next(totalNodeList.Count());
+            var choosedNode = totalNodeList.ElementAt(choosedIndex);
+            return choosedNode;
         }
 
     }
