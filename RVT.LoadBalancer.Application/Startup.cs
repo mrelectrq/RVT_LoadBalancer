@@ -45,6 +45,7 @@ namespace RVT.LoadBalancer.Application
 
             services.AddSingleton(opt =>
             {
+                var logger = opt.GetRequiredService<ILogger<RabbitMQQueueConnection>>();
                 var factory = new ConnectionFactory()
                 {
                     HostName = Configuration["QueueHost"],
@@ -99,7 +100,7 @@ namespace RVT.LoadBalancer.Application
                 endpoints.MapControllers();
             });
 
-          //  app.UseRabbitListener();
+            app.UseRabbitListener();
         }
     }
     public static class ApplicationBuilderExtensions
@@ -110,7 +111,7 @@ namespace RVT.LoadBalancer.Application
         {
             Listener = application.ApplicationServices.GetRequiredService<RabbitMQQueueConnection>();
 
-            var liftime = application.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
+            var liftime = application.ApplicationServices.GetRequiredService<Microsoft.AspNetCore.Hosting.IApplicationLifetime>();
 
             liftime.ApplicationStarted.Register(OnStarted);
             liftime.ApplicationStopping.Register(OnStopping);

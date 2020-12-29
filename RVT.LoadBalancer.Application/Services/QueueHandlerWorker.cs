@@ -45,6 +45,7 @@ namespace RVT.LoadBalancer.Application.Services
 
             receiver.Received += ReceivedEvent;
 
+            channel.BasicConsume(queue: _queueName, autoAck: true, consumer: receiver); /// very IMPORTANT
             channel.CallbackException += (sender, args) =>
             {
                 _receiverChannel.Dispose();
@@ -89,7 +90,6 @@ namespace RVT.LoadBalancer.Application.Services
                 //channel.BasicAcks Acknowledge implementation in case if Broker received message
                 channel.ConfirmSelect();
             }
-
         }
 
         public void Dispose()
@@ -97,7 +97,7 @@ namespace RVT.LoadBalancer.Application.Services
             if (_receiverChannel != null)
             {
                 _receiverChannel.Dispose();
-                _receiverChannel = InitReceiverChannel();
+              //  _receiverChannel = InitReceiverChannel();
             }
         }
     }
