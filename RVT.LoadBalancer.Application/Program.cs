@@ -26,7 +26,7 @@ namespace RVT.LoadBalancer.Application
                     webBuilder.ConfigureKestrel(o =>
                     {
                         o.ConfigureHttpsDefaults(o => o.ClientCertificateMode = Microsoft.AspNetCore.Server.Kestrel.Https.ClientCertificateMode.RequireCertificate);
-                        o.Listen(IPAddress.Loopback, 5000);
+                        o.Listen(IPAddress.Loopback, 5003);
                         o.Listen(IPAddress.Loopback, 44322, listenOpt =>
                         {
                             listenOpt.UseHttps(Path.Combine("../Certs/loadbalancer.pfx"), "ar4iar4i",opt=>opt.AllowAnyClientCertificate());

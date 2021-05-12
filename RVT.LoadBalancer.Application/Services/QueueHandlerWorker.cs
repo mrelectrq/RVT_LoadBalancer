@@ -18,7 +18,7 @@ namespace RVT.LoadBalancer.Application.Services
         private readonly IQueueConnection _queueConnection;
         private IModel _receiverChannel;
         private readonly IAdministrator _adminBL;
-
+        private int i = 1;
         public QueueHandlerWorker(IQueueConnection connection,string queueName)
         {
             _queueConnection = connection;
@@ -63,6 +63,10 @@ namespace RVT.LoadBalancer.Application.Services
 
                 var response = _adminBL.VoteAction(message);
 
+
+                
+                
+                
                 PublishResponse(response,"voteResponse",args.BasicProperties.Headers);
             }
         }

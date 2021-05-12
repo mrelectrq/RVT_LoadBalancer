@@ -24,7 +24,7 @@ namespace RVT.LoadBalancer.Core.ConsensusHandler
             }
             else
             {
-                var choosedIndex = random.Next(totalNodeList.Count());
+                var choosedIndex = 0; //random.Next(totalNodeList.Count());
                 var choosedNode = totalNodeList.ElementAt(choosedIndex);
                 Executor = choosedNode;
                 var choosedNodes = totalNodeList.OrderBy(x => random.Next()).Where(m => m.NodeId != choosedNode.NodeId).Take(i).Distinct();

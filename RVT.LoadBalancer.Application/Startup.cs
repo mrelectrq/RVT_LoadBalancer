@@ -107,6 +107,7 @@ namespace RVT.LoadBalancer.Application
     {
         public static RabbitMQQueueConnection Listener { get; set; }
 
+        [Obsolete]
         public static IApplicationBuilder UseRabbitListener(this IApplicationBuilder application)
         {
             Listener = application.ApplicationServices.GetRequiredService<RabbitMQQueueConnection>();

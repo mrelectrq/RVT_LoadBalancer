@@ -17,7 +17,7 @@ namespace RVT.LoadBalancer.Application.Services.Tests
     {
 
         [TestMethod()]
-           public void RabbitMQCoonnectivityTest()
+        public void RabbitMQCoonnectivityTest()
         {
             var clientFactory = new ConnectionFactory()
             {
@@ -37,7 +37,7 @@ namespace RVT.LoadBalancer.Application.Services.Tests
 
             var connection = clientFactory.CreateConnection();
 
-            using(var channel = connection.CreateModel())
+            using (var channel = connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "voteDataMsg", durable: false, exclusive: false, autoDelete: false, arguments: null);
 
@@ -55,9 +55,46 @@ namespace RVT.LoadBalancer.Application.Services.Tests
 
 
             Assert.IsTrue(receive_connection.IsConnected);
+        }
+
+        [TestMethod()]
+        public void RabbitMQResponsePublisher()
+        {
+            var response = "blavlbalba";
+            var clientFactory = new ConnectionFactory()
+            {
+                HostName = "localhost",
+                UserName = "guest",
+                Password = "guest",
+                Port = 5672,
+            };
+
+            var connection = clientFactory.CreateConnection();
 
 
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "voteResponse", durable: false, exclusive: false, autoDelete: false, arguments: null);
+
+                IBasicProperties properties = channel.CreateBasicProperties();
+                properties.Persistent = true;
+                properties.DeliveryMode = 2;
+                properties.Headers = new Dictionary<string, object>();
+
+
+                string messageSerialized = JsonConvert.SerializeObject(response);
+                var body = Encoding.UTF8.GetBytes(messageSerialized);
+
+                channel.ConfirmSelect();
+
+                channel.BasicPublish(exchange: "", routingKey: "voteResponse", basicProperties: properties,
+                    body: body);
+
+                channel.WaitForConfirmsOrDie();
+                channel.ConfirmSelect();
+            }
 
         }
-    }
+
+}
 }

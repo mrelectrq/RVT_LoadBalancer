@@ -10,6 +10,6 @@ namespace RVT.Common.Models
         public string NodeId { get; set; }
         public string SoftwareVersion { get; set; }
         public byte[] PublicKey { get; set; }
-        public string IpAddress { get; set; }
+        public string Url { get; set; }
     }
 }

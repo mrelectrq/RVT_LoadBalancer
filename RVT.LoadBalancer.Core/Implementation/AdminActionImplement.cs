@@ -52,7 +52,7 @@ namespace RVT.LoadBalancer.Core.Implementation
             var request_data = new NodeVoteMessage()
             {
                 Message = message,
-                Neighbors = neighbors
+                Neighbours = neighbors
             };
 
             var serialized = JsonConvert.SerializeObject(request_data);

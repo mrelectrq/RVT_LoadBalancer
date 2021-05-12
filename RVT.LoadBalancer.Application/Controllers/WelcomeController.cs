@@ -31,8 +31,7 @@ namespace RVT.LoadBalancer.Application.Controllers
         {
            var participant = _mapper.Map<NodeData>(node);
 
-            //participant.IpAddress = HttpContext.Connection.RemoteIpAddress.ToString() + ":"
-            //    + HttpContext.Connection.RemotePort.ToString();
+            participant.IpAddress = node.Url;
             
             participant.RegisterDate = DateTime.Now;
             var handler = new HttpClientHandler
